@@ -6,4 +6,5 @@ import (
 
 type UserRepository interface {
 	Create(user *domain.User) (*domain.User, error)
+	GetByUsername(username string) (*domain.User, error)
 }

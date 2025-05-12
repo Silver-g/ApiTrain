@@ -15,9 +15,22 @@ func NewPostgresUserRepo(dataBase *sql.DB) *PostgresUserRepo {
 	return &userRepoPointer
 }
 
+func (r *PostgresUserRepo) GetByUsername(username string) (*domain.User, error) {
+	var user domain.User
+	query := "SELECT id, username, password FROM users WHERE username = $1"
+	err := r.db.QueryRow(query, username).Scan(&user.ID, &user.Username, &user.Password) // тут косякнул (query, username) username это входные данные
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		} // это ошибка(скорее просто ответ) которую возвращает QueryRow напомню при успешном QueryRow она ничего не вернет.
+		return nil, err
+	}
+	return &user, nil // тут забыл сам написать успешную отработку но пофиксил(значит что то нашли по логике далее это ошибка)
+}
+
 func (r *PostgresUserRepo) Create(user *domain.User) (*domain.User, error) {
 	query := "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id"
-	err := r.db.QueryRow(query, user.Username, user.Password).Scan(&user.ID)
+	err := r.db.QueryRow(query, user.Username, user.Password).Scan(&user.ID) // ничего не возвращает только пишет данные в структуру, ну и вернет nil если все ок так как возврщает только error
 	if err != nil {
 		return nil, err
 	}

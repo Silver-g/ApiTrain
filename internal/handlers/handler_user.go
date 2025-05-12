@@ -5,13 +5,9 @@ import (
 	"ApiTrain/internal/dto"
 	"ApiTrain/internal/service/userService"
 	"encoding/json"
-	"fmt"
 	"net/http"
 )
 
-//	type Handler struct {
-//		DB *sql.DB
-//	}
 type Handler struct {
 	Service userService.UserRegister
 }
@@ -61,16 +57,23 @@ func (h *Handler) RegisterUserHandler(w http.ResponseWriter, r *http.Request) { 
 		return
 	}
 	userMaping := boundary.ConvertToInternal(userReq)
-	_, err = h.Service.Register(userMaping)
+	_, err = h.Service.Register(userMaping) // тут игонрируем 1ое поле так как мы не возвращаем пользователю данных о созадном пользователе ни username ни id и тд
 	if err != nil {
-		fmt.Println("ошибка при создании пользователя:", err) // добавь лог
+		// Обрабатываем ошибку, если пользователь уже существует
+		if err == userService.ErrUserAlreadyExists {
+			WriteResponseErr(w, 400, dto.ErrorResponse{
+				ErrorCode: "UserAlreadyExists",
+				Message:   "User with this username already exists.",
+			})
+			return
+		}
+		// Обрабатываем другие ошибки
 		WriteResponseErr(w, 500, dto.ErrorResponse{
 			ErrorCode: "InternalError",
 			Message:   "Failed to create user",
 		})
 		return
 	}
-
 	WriteResponseSuccess(w, 200, dto.SuccessResponse{
 		Message: "Пользователь успешно создан",
 	})
