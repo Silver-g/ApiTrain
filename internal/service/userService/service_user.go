@@ -2,6 +2,7 @@ package userService
 
 import (
 	"ApiTrain/internal/domain"
+	"ApiTrain/internal/security"
 	"ApiTrain/internal/store"
 	"errors"
 )
@@ -28,9 +29,14 @@ func (s *userService) Register(user domain.User) (*domain.User, error) {
 		return nil, err
 	}
 	if existingUser != nil {
-		// Возвращаем конкретную ошибку, если пользователь уже существует
+		// Возвращаем конкретную ошибку если пользователь уже существует
 		return nil, ErrUserAlreadyExists
 	}
+	hashedPassword, err := security.HashPassword(user.Password)
+	if err != nil {
+		return nil, err
+	}
+	user.Password = hashedPassword
 	createdUser, err := s.userRepo.Create(&user)
 	if err != nil {
 		return nil, err
