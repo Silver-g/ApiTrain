@@ -31,8 +31,10 @@ func main() {
 	svc := userService.NewUserService(repo)
 	// Создаём HTTP-обработчик
 	handler := handlers.NewHandler(svc)
+	handlerlogin := handlers.LoginHandler(svc)
 	http.HandleFunc("/", ServerHandler)
 	http.HandleFunc("/register", handler.RegisterUserHandler)
+	http.HandleFunc("/login", handlerlogin.LoginUserHandler)
 	fmt.Println("Server running on http://localhost:8080")
 	err = http.ListenAndServe(":8080", nil)
 	if err != nil {

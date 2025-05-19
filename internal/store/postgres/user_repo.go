@@ -3,6 +3,7 @@ package postgres
 import (
 	"ApiTrain/internal/domain"
 	"database/sql"
+	"errors"
 )
 
 type PostgresUserRepo struct {
@@ -15,14 +16,16 @@ func NewPostgresUserRepo(dataBase *sql.DB) *PostgresUserRepo {
 	return &userRepoPointer
 }
 
+var ErrUserNotFound = errors.New("user not found") // это потом убрать в отдельное место
+
 func (r *PostgresUserRepo) GetByUsername(username string) (*domain.User, error) {
 	var user domain.User
 	query := "SELECT id, username, password FROM users WHERE username = $1"
 	err := r.db.QueryRow(query, username).Scan(&user.ID, &user.Username, &user.Password) // тут косякнул (query, username) username это входные данные
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
-		} // это ошибка(скорее просто ответ) которую возвращает QueryRow напомню при успешном QueryRow она ничего не вернет.
+			return nil, ErrUserNotFound
+		}
 		return nil, err
 	}
 	return &user, nil // тут забыл сам написать успешную отработку но пофиксил(значит что то нашли по логике далее это ошибка)

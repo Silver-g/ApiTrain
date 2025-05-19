@@ -2,12 +2,16 @@ package handlers
 
 import (
 	"ApiTrain/internal/boundary"
-	"ApiTrain/internal/dto"
 	"ApiTrain/internal/service/userService"
 	"encoding/json"
 	"net/http"
 )
 
+// Так либовски тут был замечен косяк а точне ты описываешь структру реализуешь обработчик через метод
+// но не описываешь интерфейс который реализует этот метод а все потому что ты кастылем херачишь
+// роут в main следовательно что нужно узнать у Юли как тут правильно поступить по логике нужно описать интрфейс
+// и куда то не понятно куда вынести его в отедельный файл, в нем собрать метод регистрации лоигна и других твоих обработчиков
+// где это хранить да шут его знает либо в сервисе либо в пакете обработчика, костыль в main это (http.HandleFunc) а нужно в теории (mux.HandleFunc)
 type Handler struct {
 	Service userService.UserRegister
 }
@@ -17,22 +21,12 @@ func NewHandler(svc userService.UserRegister) *Handler {
 	newHandlerex.Service = svc
 	return &newHandlerex
 }
-func WriteResponseSuccess(w http.ResponseWriter, statusCode int, successResp dto.SuccessResponse) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(successResp)
-}
 
-func WriteResponseErr(w http.ResponseWriter, statusCode int, errResp dto.ErrorResponse) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(errResp)
-}
 func (h *Handler) RegisterUserHandler(w http.ResponseWriter, r *http.Request) { // уточнить почему тут делаем ссылку  r *http.Request
 	decoder := json.NewDecoder(r.Body) // константы????
 	//var errResp ErrorResponse пока отключил так как функция есть
 	if r.Method != http.MethodPost { // r.Metgod - то что прислал клиент в запросе, http.MetgodPost - константа которая хранит метод пост
-		WriteResponseErr(w, 405, dto.ErrorResponse{
+		boundary.WriteResponseErr(w, 405, boundary.ErrorResponse{
 			ErrorCode: "MethodNotAllowed",
 			Message:   "Only POST method is allowed.",
 		})
@@ -41,7 +35,7 @@ func (h *Handler) RegisterUserHandler(w http.ResponseWriter, r *http.Request) { 
 	var userReq boundary.UserRequest
 	err := decoder.Decode(&userReq) // уточнить почему тут делаем ссылку &user
 	if err != nil {
-		WriteResponseErr(w, 400, dto.ErrorResponse{
+		boundary.WriteResponseErr(w, 400, boundary.ErrorResponse{
 			ErrorCode: "StatusBadRequest",
 			Message:   "Не верный синтаксис",
 		})
@@ -50,7 +44,7 @@ func (h *Handler) RegisterUserHandler(w http.ResponseWriter, r *http.Request) { 
 
 	err = boundary.UserValidate(userReq)
 	if err != nil {
-		WriteResponseErr(w, 400, dto.ErrorResponse{
+		boundary.WriteResponseErr(w, 400, boundary.ErrorResponse{
 			ErrorCode: "ValidationError",
 			Message:   err.Error(),
 		})
@@ -61,20 +55,20 @@ func (h *Handler) RegisterUserHandler(w http.ResponseWriter, r *http.Request) { 
 	if err != nil {
 		// Обрабатываем ошибку, если пользователь уже существует
 		if err == userService.ErrUserAlreadyExists {
-			WriteResponseErr(w, 400, dto.ErrorResponse{
+			boundary.WriteResponseErr(w, 400, boundary.ErrorResponse{
 				ErrorCode: "UserAlreadyExists",
 				Message:   "User with this username already exists.",
 			})
 			return
 		}
 		// Обрабатываем другие ошибки
-		WriteResponseErr(w, 500, dto.ErrorResponse{
+		boundary.WriteResponseErr(w, 500, boundary.ErrorResponse{
 			ErrorCode: "InternalError",
 			Message:   "Failed to create user",
 		})
 		return
 	}
-	WriteResponseSuccess(w, 200, dto.SuccessResponse{
+	boundary.WriteResponseSuccess(w, 200, boundary.SuccessResponse{
 		Message: "Пользователь успешно создан",
 	})
 }
