@@ -5,10 +5,20 @@ import (
 	"database/sql"
 )
 
+type Postgres struct {
+	db *sql.DB
+}
+
+func NewPostgres(dataBase *sql.DB) *Postgres {
+	var userRepoPointer Postgres
+	userRepoPointer.db = dataBase
+	return &userRepoPointer
+} // ебучий тильт чтобы оно работало нужно переносить локигку подлючения к базе или это в отдельный файл я в ахуе....
+
 // ну я использовал структуру из другого файла и опять же нужно делать новое соединение новую структуру и новую функцию конструктор
 // или вынести это в какой то отедльный файлик и передавать в репозитории как глобальное решение (я хз как надо памагите)
 // повторить синтаксис как писать кастомные ошибки
-func (r *PostgresUserRepo) LoginByUsername(username string) (*domain.LoginUserInternal, error) {
+func (r *Postgres) LoginByUsername(username string) (*domain.LoginUserInternal, error) {
 	var userLogin domain.LoginUserInternal
 	query := "SELECT id, username, password FROM users WHERE username = $1" // переписать сеодня в конспект напомнить sql логику не смог дописать услвоие поиска
 	err := r.db.QueryRow(query, username).Scan(&userLogin.ID, &userLogin.Username, &userLogin.PasswordHash)
@@ -22,21 +32,3 @@ func (r *PostgresUserRepo) LoginByUsername(username string) (*domain.LoginUserIn
 	}
 	return &userLogin, nil
 }
-
-// import (
-// 	"ApiTrain/internal/domain"
-// 	"database/sql"
-// )
-
-// func (r *PostgresUserRepo) LoginByUsername(username string) (*domain.LoginUserInternal, error) {
-// 	var user domain.LoginUserInternal
-// 	query := "SELECT id, username, password FROM users WHERE username = $1"
-// 	err := r.db.QueryRow(query, username).Scan(&user.ID, &user.Username, &user.PasswordHash)
-// 	if err != nil {
-// 		if err == sql.ErrNoRows {
-// 			return nil, ErrUserNotFound
-// 		}
-// 		return nil, err
-// 	}
-// 	return &user, nil
-// }

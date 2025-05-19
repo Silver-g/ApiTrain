@@ -27,7 +27,7 @@ func main() {
 		panic(err)
 	}
 	// Создаём репозиторий и сервис
-	repo := postgres.NewPostgresUserRepo(db)
+	repo := postgres.NewPostgres(db)
 	svc := userService.NewUserService(repo)
 	// Создаём HTTP-обработчик
 	handler := handlers.NewHandler(svc)
