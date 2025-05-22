@@ -69,7 +69,7 @@ func (h *HandlerCreatePost) CreatePostHandler(w http.ResponseWriter, r *http.Req
 	if err != nil {
 		boundary.WriteResponseErr(w, 500, boundary.ErrorResponse{
 			ErrorCode: "InternalError",
-			Message:   "Failed to create post",
+			Message:   err.Error(),
 		})
 		return
 	}

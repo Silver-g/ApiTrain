@@ -30,7 +30,7 @@ func main() {
 	// Создаём репозиторий и сервис
 	repo := postgres.NewPostgres(db)
 	svc := userService.NewUserService(repo)
-	cpsvc := postService.CreatePostServiceConstruct(repo)
+	cpsvc := postService.NewCreatePostService(repo)
 	// Создаём HTTP-обработчик
 	handler := handlers.NewHandler(svc)
 	handlerlogin := handlers.LoginHandler(svc)

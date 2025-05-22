@@ -10,7 +10,7 @@ type ErrorResponse struct {
 	Message   string `json:"message"`
 }
 type SuccessResponse struct {
-	ResponseData interface{} `json:"Data"`
+	ResponseData interface{} `json:"Data"` // уточнить можно ли так делать йоу
 	Message      string      `json:"message"`
 }
 
