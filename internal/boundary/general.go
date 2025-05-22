@@ -10,8 +10,8 @@ type ErrorResponse struct {
 	Message   string `json:"message"`
 }
 type SuccessResponse struct {
-	Token   string `json:"token"`
-	Message string `json:"message"`
+	ResponseData interface{} `json:"Data"`
+	Message      string      `json:"message"`
 }
 
 func WriteResponseSuccess(w http.ResponseWriter, statusCode int, successResp SuccessResponse) {

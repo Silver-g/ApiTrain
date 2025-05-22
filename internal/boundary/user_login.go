@@ -53,6 +53,6 @@ func LoginValidate(userLoginReq UserLogin) error {
 
 	if containsProhibitedChars(userLoginReq.Username) || containsProhibitedChars(userLoginReq.Password) {
 		return errors.New("login or password contains prohibited characters")
-	}
+	} //почистить вывод ошибок
 	return nil
 }

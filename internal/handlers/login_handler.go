@@ -74,7 +74,7 @@ func (h *HandlerLogin) LoginUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	boundary.WriteResponseSuccess(w, 200, boundary.SuccessResponse{
-		Token:   userAuthToken,
-		Message: "Авторизация прошла успешно",
+		ResponseData: userAuthToken,
+		Message:      "Авторизация прошла успешно",
 	})
 }

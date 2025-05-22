@@ -30,7 +30,7 @@ type UserLogin interface {
 // опять насрал с указателем при передаче структуры сукааа да как это работает мы же блять просто читаем то что делает база(уровень стор) или это завиит от принимаемых параметров методом аааааааааааааа убейте убейте меня
 // очередной ахуенный вопрос тут когда мы реализуем метод имя параметро должно быть равно тому что мы указали в методе или нет или да потому что чисто и логично или да потому они логически связанны или нет потому что логически не связаны
 var InvalidUsername error = errors.New("Invalid username or user does not exist")
-var IncorrectPassword error = errors.New("Incorrect password")
+var IncorrectPassword error = errors.New("Incorrect password") //вынести текст в константы в конце
 
 func (s *UserService) Login(loginData domain.LoginUserInternal) (string, error) {
 	var err error
