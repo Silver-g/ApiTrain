@@ -47,7 +47,7 @@ func (h *HandlerCreatePost) CreatePostHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	var postReq boundary.CreatePostRequest
+	postReq := new(boundary.CreatePostRequest) // var postReq *boundary.CreatePostRequest тут конспект + разобратся с указателем почему так там было что то про памят мб переделать выглядит страшна
 	err = decoder.Decode(&postReq)
 	if err != nil {
 		boundary.WriteResponseErr(w, 400, boundary.ErrorResponse{
@@ -56,7 +56,7 @@ func (h *HandlerCreatePost) CreatePostHandler(w http.ResponseWriter, r *http.Req
 		})
 		return
 	}
-	err = boundary.CreatePostPostValidate(postReq)
+	err = boundary.CreatePostPostValidate(*postReq) //добавил указатель для валидации bool уточнить перепроверить
 	if err != nil {
 		boundary.WriteResponseErr(w, 400, boundary.ErrorResponse{
 			ErrorCode: "ValidationError",
