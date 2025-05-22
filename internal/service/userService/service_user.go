@@ -4,7 +4,6 @@ import (
 	"ApiTrain/internal/domain"
 	"ApiTrain/internal/security"
 	"ApiTrain/internal/store"
-	"ApiTrain/internal/store/postgres"
 	"errors"
 )
 
@@ -25,12 +24,10 @@ func NewUserService(repo store.UserRepository) *UserService {
 
 func (s *UserService) Register(user domain.User) (*domain.User, error) {
 	existingUser, err := s.userRepo.GetByUsername(user.Username)
-	if err != nil && err != postgres.ErrUserNotFound {
-		// Внутренняя ошибка при попытке получить пользователя
+	if err != nil {
 		return nil, err
-	} // мб переделать обработку ошибок с error.is
-	if existingUser != nil {
-		// Возвращаем конкретную ошибку если пользователь уже существует
+	}
+	if existingUser == true {
 		return nil, ErrUserAlreadyExists
 	}
 	hashedPassword, err := security.HashPassword(user.Password)

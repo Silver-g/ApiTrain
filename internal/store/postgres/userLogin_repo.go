@@ -3,8 +3,10 @@ package postgres
 import (
 	"ApiTrain/internal/domain"
 	"database/sql"
+	"errors"
 )
 
+var ErrUserNotFound = errors.New("user not found") // это потом убрать в отдельное место
 type Postgres struct {
 	db *sql.DB
 }
