@@ -22,8 +22,7 @@ func ParseJwt(jwtToken string) (int, error) { // удачи сегодня ве�
 		return 0, err
 	}
 	token, err := jwt.Parse(jwtToken, func(t *jwt.Token) (interface{}, error) {
-		method := t.Method
-		_, ok := method.(*jwt.SigningMethodHMAC)
+		_, ok := t.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
 			return nil, UnexpectedMethod
 		}
@@ -32,21 +31,18 @@ func ParseJwt(jwtToken string) (int, error) { // удачи сегодня ве�
 	if err != nil {
 		return 0, err
 	}
-	claimsRaw := token.Claims
-	claims, ok := claimsRaw.(jwt.MapClaims)
+
+	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return 0, FailedParseClaims
 	}
-
 	if !token.Valid {
 		return 0, InvalidJwtToken
 	}
-
-	userIDFloat, ok := claims["user_id"].(float64) //нахуя можно же просто инт айдишник не будет дробью никогда
+	userIDFloat, ok := claims["user_id"].(float64)
 	if !ok {
 		return 0, UnreadableUserId
 	}
-
 	return int(userIDFloat), nil
 }
 

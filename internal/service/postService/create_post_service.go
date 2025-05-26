@@ -9,7 +9,7 @@ import (
 var ErrAlreadyExist error = errors.New("post with this title already exists")
 
 type CreatePost interface {
-	PostCreate(createPostData domain.CreatePostInternal) (int, error)
+	PostCreate(createPostData *domain.CreatePostInternal) (int, error)
 }
 
 type CreatePostService struct {
@@ -22,7 +22,7 @@ func NewCreatePostService(postCreateRepo store.CreatePostRepo) *CreatePostServic
 	return &createPostServicePointer
 }
 
-func (s *CreatePostService) PostCreate(createPostMapData domain.CreatePostInternal) (int, error) {
+func (s *CreatePostService) PostCreate(createPostMapData *domain.CreatePostInternal) (int, error) {
 	exists, err := s.createPostRepo.IsPostTitleExists(createPostMapData.Title)
 	if err != nil {
 		return 0, err
@@ -30,9 +30,9 @@ func (s *CreatePostService) PostCreate(createPostMapData domain.CreatePostIntern
 	if exists {
 		return 0, ErrAlreadyExist
 	}
-	postId, err := s.createPostRepo.CreatePost(&createPostMapData)
+	postData, err := s.createPostRepo.CreatePost(createPostMapData)
 	if err != nil {
 		return 0, err
 	}
-	return postId.PostId, nil
+	return postData.Id, nil
 }

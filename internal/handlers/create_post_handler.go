@@ -65,7 +65,7 @@ func (h *HandlerCreatePost) CreatePostHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 	CreatePostMaping := boundary.CreapePostMaping(postReq, userId) //мб завези обрбаотку ошибок
-	postId, err := h.CreatePostService.PostCreate(CreatePostMaping)
+	postId, err := h.CreatePostService.PostCreate(&CreatePostMaping)
 	if err != nil {
 		boundary.WriteResponseErr(w, 500, boundary.ErrorResponse{
 			ErrorCode: "InternalError",
