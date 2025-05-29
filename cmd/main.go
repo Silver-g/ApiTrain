@@ -38,12 +38,14 @@ func main() {
 	handlerlogin := handlers.LoginHandler(svc)
 	handlerPostCreate := handlers.CreatePostHandler(cpsvc)
 	handlerCommentCreate := handlers.CreateCommentHandler(ccsvc)
+	handlerBuildTree := handlers.BuildTreeHandler(ccsvc)
 	http.HandleFunc("/", ServerHandler)
 	http.HandleFunc("/register", handler.RegisterUserHandler)
 	http.HandleFunc("/login", handlerlogin.LoginUserHandler)
-	http.HandleFunc("/createpost", handlerPostCreate.CreatePostHandler)          // с именами пиздец
-	http.HandleFunc("/createcomment", handlerCommentCreate.CreateCommentHandler) // с именами полная жесть как она есть намекну проблема в схожих именах назввания метода обработчика функции конструктора и тд тут нужен метод обработчика
-	fmt.Println("Server running on http://localhost:8080")
+	http.HandleFunc("/createpost", handlerPostCreate.CreatePostHandler) // с именами пиздец
+	http.HandleFunc("/createcomment", handlerCommentCreate.CreateCommentHandler)
+	http.HandleFunc("/posts/", handlerBuildTree.BuildTreeHandler) // с именами полная жесть как она есть намекну проблема в схожих именах назввания метода обработчика функции конструктора и тд тут нужен метод обработчика
+	fmt.Println("Server running on http://localhost:8080")        //переделать пути по рест меня ждет ебка с тем чтобы правильно парсить путь
 	err = http.ListenAndServe(":8080", nil)
 	if err != nil {
 		fmt.Println("ошибка при запуске")

@@ -14,15 +14,16 @@ type CreateCommentServ interface {
 	CommentCreate(commentData *domain.CreateCommentInternal) (int, error)
 }
 
-type CreateCommentService struct {
-	createCommentRepo store.CreateCommentRepo
+type CreateCommentService struct { //переделать название
+	createCommentRepo store.CommentRepository
 }
 
-func NewCreateCommentService(commentCreateRepo store.CreateCommentRepo) *CreateCommentService {
+func NewCreateCommentService(commentCreateRepo store.CommentRepository) *CreateCommentService {
 	var CommentCreateServicePointer CreateCommentService
 	CommentCreateServicePointer.createCommentRepo = commentCreateRepo
 	return &CommentCreateServicePointer
 }
+
 func (s *CreateCommentService) CommentCreate(commentData *domain.CreateCommentInternal) (int, error) { //опять ебучие указатели врот их наоборот//
 	err := s.createCommentRepo.CommentsAllowed(commentData.PostId)
 	if err == postgres.ErrCommentsDisabled {

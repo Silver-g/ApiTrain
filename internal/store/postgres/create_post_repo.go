@@ -9,7 +9,7 @@ func (r *Postgres) IsPostTitleExists(title string) (bool, error) { //возмо�
 	if err != nil {
 		return false, err
 	}
-	return exists, nil
+	return exists, nil //похоу бул нахрен не нужен можно сделать проверки на этом уровне а возвращать только ошибку как правильно в душе не секу
 
 }
 func (r *Postgres) CreatePost(createPostData *domain.CreatePostInternal) (*domain.CreatePostInternal, error) {

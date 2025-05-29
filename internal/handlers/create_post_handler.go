@@ -48,7 +48,7 @@ func (h *HandlerCreatePost) CreatePostHandler(w http.ResponseWriter, r *http.Req
 	}
 
 	postReq := new(boundary.CreatePostRequest) // var postReq *boundary.CreatePostRequest тут конспект + разобратся с указателем почему так там было что то про памят мб переделать выглядит страшна
-	err = decoder.Decode(&postReq)
+	err = decoder.Decode(&postReq)             //вспомнить про new вроде бы для указателя на поле comment enabled
 	if err != nil {
 		boundary.WriteResponseErr(w, 400, boundary.ErrorResponse{
 			ErrorCode: "StatusBadRequest",
