@@ -1,4 +1,4 @@
-package store
+package userrepo
 
 import (
 	"ApiTrain/internal/domain"

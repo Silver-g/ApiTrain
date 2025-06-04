@@ -1,4 +1,4 @@
-package store
+package commentrepo
 
 import "ApiTrain/internal/domain"
 

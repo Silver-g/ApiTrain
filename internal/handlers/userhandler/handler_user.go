@@ -1,8 +1,8 @@
-package handlers
+package userhandler
 
 import (
 	"ApiTrain/internal/boundary"
-	"ApiTrain/internal/service/userService"
+	"ApiTrain/internal/service/userservice"
 	"encoding/json"
 	"net/http"
 )
@@ -12,17 +12,17 @@ import (
 // роут в main следовательно что нужно узнать у Юли как тут правильно поступить по логике нужно описать интрфейс
 // и куда то не понятно куда вынести его в отедельный файл, в нем собрать метод регистрации лоигна и других твоих обработчиков
 // где это хранить да шут его знает либо в сервисе либо в пакете обработчика, костыль в main это (http.HandleFunc) а нужно в теории (mux.HandleFunc)
-type Handler struct {
-	Service userService.UserRegister
+type HandlerUserRegister struct {
+	Service userservice.UserRegister
 }
 
-func NewHandler(svc userService.UserRegister) *Handler {
-	var newHandlerex Handler
-	newHandlerex.Service = svc
-	return &newHandlerex
+func NewHandlerRegister(svc userservice.UserRegister) *HandlerUserRegister {
+	var newHandUser HandlerUserRegister
+	newHandUser.Service = svc
+	return &newHandUser
 }
 
-func (h *Handler) RegisterUserHandler(w http.ResponseWriter, r *http.Request) { // уточнить почему тут делаем ссылку  r *http.Request
+func (h *HandlerUserRegister) RegisterUserHandler(w http.ResponseWriter, r *http.Request) { // уточнить почему тут делаем ссылку  r *http.Request
 	decoder := json.NewDecoder(r.Body) // константы????
 	//var errResp ErrorResponse пока отключил так как функция есть
 	if r.Method != http.MethodPost { // r.Metgod - то что прислал клиент в запросе, http.MetgodPost - константа которая хранит метод пост
@@ -54,7 +54,7 @@ func (h *Handler) RegisterUserHandler(w http.ResponseWriter, r *http.Request) { 
 	_, err = h.Service.Register(userMaping) // тут игонрируем 1ое поле так как мы не возвращаем пользователю данных о созадном пользователе ни username ни id и тд
 	if err != nil {
 		// Обрабатываем ошибку, если пользователь уже существует
-		if err == userService.ErrUserAlreadyExists {
+		if err == userservice.ErrUserAlreadyExists {
 			boundary.WriteResponseErr(w, 400, boundary.ErrorResponse{
 				ErrorCode: "UserAlreadyExists",
 				Message:   "User with this username already exists.",

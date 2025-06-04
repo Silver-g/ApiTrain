@@ -1,21 +1,14 @@
-package store
+package db
 
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 func ConnectDB() (*sql.DB, error) {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Ошибка загрузки .env файла")
-		return nil, err
-	}
 	connectString := "host=%s port=%s user=%s password=%s dbname=%s sslmode=disable"
 	connectInput := fmt.Sprintf(
 		connectString,
@@ -28,9 +21,7 @@ func ConnectDB() (*sql.DB, error) {
 	driver := os.Getenv("DB_DRIVER")
 	db, err := sql.Open(driver, connectInput)
 	if err != nil {
-		fmt.Println("ошибка подключения")
-		return nil, fmt.Errorf("не удалось открыть соединение: %w", err)
+		return nil, err
 	}
-
 	return db, nil
 }

@@ -1,9 +1,8 @@
-package commentService
+package commentservice
 
 import (
 	"ApiTrain/internal/domain"
-	"ApiTrain/internal/store"
-	"ApiTrain/internal/store/postgres"
+	"ApiTrain/internal/store/postgres/commentrepo"
 	"errors"
 )
 
@@ -15,10 +14,10 @@ type CreateCommentServ interface {
 }
 
 type CreateCommentService struct { //переделать название
-	createCommentRepo store.CommentRepository
+	createCommentRepo commentrepo.CommentRepository
 }
 
-func NewCreateCommentService(commentCreateRepo store.CommentRepository) *CreateCommentService {
+func NewCommentService(commentCreateRepo commentrepo.CommentRepository) *CreateCommentService {
 	var CommentCreateServicePointer CreateCommentService
 	CommentCreateServicePointer.createCommentRepo = commentCreateRepo
 	return &CommentCreateServicePointer
@@ -26,10 +25,10 @@ func NewCreateCommentService(commentCreateRepo store.CommentRepository) *CreateC
 
 func (s *CreateCommentService) CommentCreate(commentData *domain.CreateCommentInternal) (int, error) { //опять ебучие указатели врот их наоборот//
 	err := s.createCommentRepo.CommentsAllowed(commentData.PostId)
-	if err == postgres.ErrCommentsDisabled {
+	if err == commentrepo.ErrCommentsDisabled {
 		return 0, ErrCommentsDisabled
 	}
-	if err == postgres.ErrPostNotFound {
+	if err == commentrepo.ErrPostNotFound {
 		return 0, ErrPostNotFound
 	}
 	if err != nil {

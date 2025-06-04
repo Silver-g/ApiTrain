@@ -1,19 +1,19 @@
-package handlers
+package posthandler
 
 import (
 	"ApiTrain/internal/boundary"
 	"ApiTrain/internal/security"
-	"ApiTrain/internal/service/postService"
+	"ApiTrain/internal/service/postservice"
 	"encoding/json"
 	"net/http"
 	"strings"
 )
 
 type HandlerCreatePost struct {
-	CreatePostService postService.CreatePost
+	CreatePostService postservice.CreatePost
 }
 
-func CreatePostHandler(cpsvc postService.CreatePost) *HandlerCreatePost {
+func NewCreatePostHandler(cpsvc postservice.CreatePost) *HandlerCreatePost {
 	var newHandlerex HandlerCreatePost
 	newHandlerex.CreatePostService = cpsvc
 	return &newHandlerex
@@ -67,6 +67,14 @@ func (h *HandlerCreatePost) CreatePostHandler(w http.ResponseWriter, r *http.Req
 	CreatePostMaping := boundary.CreapePostMaping(postReq, userId) //мб завези обрбаотку ошибок
 	postId, err := h.CreatePostService.PostCreate(&CreatePostMaping)
 	if err != nil {
+		if err == postservice.ErrAlreadyExist {
+			boundary.WriteResponseErr(w, 409, boundary.ErrorResponse{
+				ErrorCode: "Conflict",
+				Message:   err.Error(),
+			})
+			return
+
+		}
 		boundary.WriteResponseErr(w, 500, boundary.ErrorResponse{
 			ErrorCode: "InternalError",
 			Message:   err.Error(),

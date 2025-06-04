@@ -1,4 +1,4 @@
-package store
+package postrepo
 
 import "ApiTrain/internal/domain"
 

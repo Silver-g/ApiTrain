@@ -1,4 +1,4 @@
-package commentService
+package commentservice
 
 import (
 	"ApiTrain/internal/domain"

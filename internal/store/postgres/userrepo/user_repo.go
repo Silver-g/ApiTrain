@@ -1,4 +1,4 @@
-package postgres
+package userrepo
 
 import (
 	"ApiTrain/internal/domain"
@@ -7,12 +7,12 @@ import (
 )
 
 var ErrUserNotFound = errors.New("user not found") // это потом убрать в отдельное место
-type Postgres struct {
+type UserPostgres struct {                         //сделал так как у умного дяди но мб вообще нужно иначе ЮЛЯ В ПОМОЩЬ
 	db *sql.DB
 }
 
-func NewPostgres(dataBase *sql.DB) *Postgres {
-	var userRepoPointer Postgres
+func NewPostgresUser(dataBase *sql.DB) *UserPostgres {
+	var userRepoPointer UserPostgres
 	userRepoPointer.db = dataBase
 	return &userRepoPointer
 } // ебучий тильт чтобы оно работало нужно переносить локигку подлючения к базе или это в отдельный файл я в ахуе....
@@ -20,7 +20,7 @@ func NewPostgres(dataBase *sql.DB) *Postgres {
 // ну я использовал структуру из другого файла и опять же нужно делать новое соединение новую структуру и новую функцию конструктор
 // или вынести это в какой то отедльный файлик и передавать в репозитории как глобальное решение (я хз как надо памагите)
 // повторить синтаксис как писать кастомные ошибки
-func (r *Postgres) LoginByUsername(username string) (*domain.LoginUserInternal, error) {
+func (r *UserPostgres) LoginByUsername(username string) (*domain.LoginUserInternal, error) {
 	var userLogin domain.LoginUserInternal
 	query := "SELECT id, username, password FROM users WHERE username = $1" // переписать сеодня в конспект напомнить sql логику не смог дописать услвоие поиска
 	err := r.db.QueryRow(query, username).Scan(&userLogin.ID, &userLogin.Username, &userLogin.PasswordHash)
@@ -33,4 +33,22 @@ func (r *Postgres) LoginByUsername(username string) (*domain.LoginUserInternal, 
 		return nil, err
 	}
 	return &userLogin, nil
+}
+func (r *UserPostgres) GetByUsername(username string) (bool, error) {
+	var exists bool
+	query := "SELECT EXISTS (SELECT 1 FROM users WHERE username = $1)"
+	err := r.db.QueryRow(query, username).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (r *UserPostgres) Create(user *domain.User) (*domain.User, error) {
+	query := "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id"
+	err := r.db.QueryRow(query, user.Username, user.Password).Scan(&user.ID)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }

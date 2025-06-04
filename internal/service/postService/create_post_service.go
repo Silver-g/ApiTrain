@@ -1,8 +1,8 @@
-package postService
+package postservice
 
 import (
 	"ApiTrain/internal/domain"
-	"ApiTrain/internal/store"
+	"ApiTrain/internal/store/postgres/postrepo"
 	"errors"
 )
 
@@ -13,10 +13,10 @@ type CreatePost interface {
 }
 
 type CreatePostService struct {
-	createPostRepo store.CreatePostRepo
+	createPostRepo postrepo.CreatePostRepo
 }
 
-func NewCreatePostService(postCreateRepo store.CreatePostRepo) *CreatePostService {
+func NewPostService(postCreateRepo postrepo.CreatePostRepo) *CreatePostService {
 	var createPostServicePointer CreatePostService
 	createPostServicePointer.createPostRepo = postCreateRepo
 	return &createPostServicePointer

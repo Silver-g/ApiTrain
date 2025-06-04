@@ -1,4 +1,4 @@
-package postgres
+package commentrepo
 
 import (
 	"ApiTrain/internal/domain"
@@ -7,10 +7,20 @@ import (
 	"fmt"
 )
 
+type CommentPostgres struct { //сделал так как у умного дяди но мб вообще нужно иначе ЮЛЯ В ПОМОЩЬ
+	db *sql.DB
+}
+
+func NewPostgresComment(dataBase *sql.DB) *CommentPostgres {
+	var CommentRepoPointer CommentPostgres
+	CommentRepoPointer.db = dataBase
+	return &CommentRepoPointer
+}
+
 var ErrPostNotFound error = errors.New("post not found")
 var ErrCommentsDisabled error = errors.New("сomments are closed for this post")
 
-func (r *Postgres) GetPostById(postId int) (*domain.PostResponse, error) {
+func (r *CommentPostgres) GetPostById(postId int) (*domain.PostResponse, error) {
 	var postResponseData domain.PostResponse
 	query := "SELECT id, title, text FROM posts WHERE id = $1"
 	err := r.db.QueryRow(query, postId).Scan(&postResponseData.Id, &postResponseData.Title, &postResponseData.Text)
@@ -20,10 +30,11 @@ func (r *Postgres) GetPostById(postId int) (*domain.PostResponse, error) {
 	return &postResponseData, nil
 } //мб перести
 
-func (r *Postgres) GetCommentsByPostID(postId int) ([]*domain.CreateCommentInternal, error) {
+func (r *CommentPostgres) GetCommentsByPostID(postId int) ([]*domain.CreateCommentInternal, error) {
 	var err error
 	var comments []*domain.CreateCommentInternal //повторить синтаксис срезов
-	rows, err := r.db.Query("SELECT id, post_id, user_id, parent_id, text FROM comments WHERE post_id = $1", postId)
+	query := "SELECT id, post_id, user_id, parent_id, text FROM comments WHERE post_id = $1"
+	rows, err := r.db.Query(query, postId)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +61,7 @@ func (r *Postgres) GetCommentsByPostID(postId int) ([]*domain.CreateCommentInter
 	return comments, nil
 }
 
-func (r *Postgres) CommentsAllowed(postId int) error {
+func (r *CommentPostgres) CommentsAllowed(postId int) error {
 	var commentsEnabled bool
 	query := "SELECT comments_enabled FROM posts WHERE id = $1"
 	err := r.db.QueryRow(query, postId).Scan(&commentsEnabled)
@@ -67,7 +78,7 @@ func (r *Postgres) CommentsAllowed(postId int) error {
 	return nil
 }
 
-func (r *Postgres) CreateComment(commentData *domain.CreateCommentInternal) (*domain.CreateCommentInternal, error) {
+func (r *CommentPostgres) CreateComment(commentData *domain.CreateCommentInternal) (*domain.CreateCommentInternal, error) {
 	var err error                                                                                            //вынести глобально?
 	query := "INSERT INTO comments (post_id, user_id, parent_Id, text) VALUES ($1, $2, $3, $4) RETURNING id" // у постов пофикси id
 	err = r.db.QueryRow(query, commentData.PostId, commentData.UserId, commentData.ParentId, commentData.Text).Scan(&commentData.Id)

@@ -1,17 +1,20 @@
 package main
 
 import (
-	"ApiTrain/internal/handlers"
-	"ApiTrain/internal/service/commentService"
-	"ApiTrain/internal/service/postService"
-	"ApiTrain/internal/service/userService"
-	"ApiTrain/internal/store"
-	"ApiTrain/internal/store/postgres"
+	"ApiTrain/internal/config"
+	"ApiTrain/internal/handlers/commenthandler"
+	"ApiTrain/internal/handlers/posthandler"
+	"ApiTrain/internal/handlers/userhandler"
+	"ApiTrain/internal/service/commentservice"
+	"ApiTrain/internal/service/postservice"
+	"ApiTrain/internal/service/userservice"
+	"ApiTrain/internal/store/db"
+	"ApiTrain/internal/store/postgres/commentrepo"
+	"ApiTrain/internal/store/postgres/postrepo"
+	"ApiTrain/internal/store/postgres/userrepo"
 	"fmt"
 	"log"
 	"net/http"
-
-	"github.com/joho/godotenv"
 )
 
 func ServerHandler(w http.ResponseWriter, r *http.Request) {
@@ -19,33 +22,46 @@ func ServerHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	err := godotenv.Load()
+	var err error
+	//Подгурзка енв украл из db(сделал отдельную функцию, это логично так как может быть несколько енв файлов)
+	err = config.InitConfig(".env") // имя передал напрямую по факту норм но вообще можно вынести его в константу
 	if err != nil {
-		log.Fatal("Ошибка загрузки .env файла")
+		log.Fatal("Ошибка загрузки .env файла") // лог фатал завершит программу через (os.Exit(1)) эта штука принудительно завершит программу. Исппользую именно там где некуда уже передавать ошибу нет четкого механизма ответа нужно просто сказать что что то критично пошло не так паника или типо того.
 	}
 	// Подключаемся к БД
-	db, err := store.ConnectDB()
+	db, err := db.ConnectDB()
 	if err != nil {
-		panic(err)
+		log.Fatal("Не удалось открыть соединение с базой данных")
 	}
 	// Создаём репозиторий и сервис
-	repo := postgres.NewPostgres(db)
-	svc := userService.NewUserService(repo)
-	cpsvc := postService.NewCreatePostService(repo)
-	ccsvc := commentService.NewCreateCommentService(repo)
+	userRepo := userrepo.NewPostgresUser(db)
+	postRepo := postrepo.NewPostgresPost(db)
+	commentRepo := commentrepo.NewPostgresComment(db)
+	////////////////////////////////////////////////////////
+	svc := userservice.NewUserService(userRepo)
+	cpsvc := postservice.NewPostService(postRepo)
+	ccsvc := commentservice.NewCommentService(commentRepo)
 	// Создаём HTTP-обработчик
-	handler := handlers.NewHandler(svc)
-	handlerlogin := handlers.LoginHandler(svc)
-	handlerPostCreate := handlers.CreatePostHandler(cpsvc)
-	handlerCommentCreate := handlers.CreateCommentHandler(ccsvc)
-	handlerBuildTree := handlers.BuildTreeHandler(ccsvc)
+	handler := userhandler.NewHandlerRegister(svc)
+	handlerlogin := userhandler.NewLoginHandler(svc)
+	//
+	handlerPostCreate := posthandler.NewCreatePostHandler(cpsvc)
+	//
+	handlerCommentCreate := commenthandler.NewCreateCommentHandler(ccsvc)
+	handlerBuildTree := commenthandler.NewBuildTreeHandler(ccsvc)
+	//
+	var temp commenthandler.CommentRouter
+	temp.CreateHandler = handlerCommentCreate
+	temp.TreeHandler = handlerBuildTree //разобрать эту запись
+	commentRouter := &temp
+	//////////////////////////////////////////////////////////
 	http.HandleFunc("/", ServerHandler)
 	http.HandleFunc("/register", handler.RegisterUserHandler)
-	http.HandleFunc("/login", handlerlogin.LoginUserHandler)
-	http.HandleFunc("/createpost", handlerPostCreate.CreatePostHandler) // с именами пиздец
-	http.HandleFunc("/createcomment", handlerCommentCreate.CreateCommentHandler)
-	http.HandleFunc("/posts/", handlerBuildTree.BuildTreeHandler) // с именами полная жесть как она есть намекну проблема в схожих именах назввания метода обработчика функции конструктора и тд тут нужен метод обработчика
-	fmt.Println("Server running on http://localhost:8080")        //переделать пути по рест меня ждет ебка с тем чтобы правильно парсить путь
+	http.HandleFunc("/login", handlerlogin.LoginUserHandler) // тут кста все же не на функцию конструктор а как ты и думал на метод обработчика что в целомл логично
+	http.HandleFunc("/posts", handlerPostCreate.CreatePostHandler)
+	// ниже костыль
+	http.Handle("/posts/", commentRouter) //Подробно разобрать что как и почему в самом кастомном роуте и в целом
+	fmt.Println("Server running on http://localhost:8080")
 	err = http.ListenAndServe(":8080", nil)
 	if err != nil {
 		fmt.Println("ошибка при запуске")

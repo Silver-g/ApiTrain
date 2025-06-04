@@ -1,9 +1,9 @@
-package handlers
+package commenthandler
 
 import (
 	"ApiTrain/internal/boundary"
 	"ApiTrain/internal/security"
-	"ApiTrain/internal/service/commentService"
+	"ApiTrain/internal/service/commentservice"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -11,10 +11,10 @@ import (
 )
 
 type HandlerCreateComment struct {
-	CreateCommentService commentService.CreateCommentServ // Тут передаем интефрейс еще раз напомни себе почему
+	CreateCommentService commentservice.CreateCommentServ // Тут передаем интефрейс еще раз напомни себе почему
 }
 
-func CreateCommentHandler(ccsvc commentService.CreateCommentServ) *HandlerCreateComment {
+func NewCreateCommentHandler(ccsvc commentservice.CreateCommentServ) *HandlerCreateComment {
 	var newHandlerCrCom HandlerCreateComment
 	newHandlerCrCom.CreateCommentService = ccsvc
 	return &newHandlerCrCom
@@ -48,13 +48,10 @@ func (h *HandlerCreateComment) CreateCommentHandler(w http.ResponseWriter, r *ht
 		return
 	}
 	//////////////////////////////////////////////////////////////////////////////////////////////////////// -- РАЗОБРАТЬ идею то я понял но вот синтаксис местами да
-	postIdStr := r.URL.Query().Get("post_id")
-	if postIdStr == "" {
-		boundary.WriteResponseErr(w, 400, boundary.ErrorResponse{
-			ErrorCode: "StatusBadRequest",
-			Message:   "missing post_id",
-		})
-		return
+	var postIdStr string
+	parts := strings.Split(r.URL.Path, "/") // ["", "posts", "123", "comments"]
+	if len(parts) >= 4 && parts[3] == "comments" {
+		postIdStr = parts[2]
 	}
 	postId, err := strconv.Atoi(postIdStr)
 	if err != nil {
@@ -93,14 +90,14 @@ func (h *HandlerCreateComment) CreateCommentHandler(w http.ResponseWriter, r *ht
 	commentDataMaping := boundary.CreateCommentMaping(commentReq, userId, postId)
 	commentId, err := h.CreateCommentService.CommentCreate(&commentDataMaping) //очко с указателями
 	if err != nil {
-		if err == commentService.ErrCommentsDisabled {
+		if err == commentservice.ErrCommentsDisabled {
 			boundary.WriteResponseErr(w, 403, boundary.ErrorResponse{
 				ErrorCode: "Forbidden",
 				Message:   err.Error(), //мб кастомная ошибка нужна, на этапе чистки посмотришь
 			})
 			return
 		}
-		if err == commentService.ErrPostNotFound {
+		if err == commentservice.ErrPostNotFound {
 			boundary.WriteResponseErr(w, 404, boundary.ErrorResponse{
 				ErrorCode: "NotFound",
 				Message:   err.Error(), //мб кастомная ошибка нужна, на этапе чистки посмотришь

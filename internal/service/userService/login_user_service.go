@@ -1,9 +1,9 @@
-package userService
+package userservice
 
 import (
 	"ApiTrain/internal/domain"
 	"ApiTrain/internal/security"
-	"ApiTrain/internal/store/postgres"
+	"ApiTrain/internal/store/postgres/userrepo"
 	"errors"
 )
 
@@ -36,7 +36,7 @@ func (s *UserService) Login(loginData domain.LoginUserInternal) (string, error) 
 	var err error
 	userData, err := s.userRepo.LoginByUsername(loginData.Username) // вместо userRepo передал store.UserRepository логическо верно сематически нет вообще так как мы же в поле передаем по ключу а не просто в воздух
 	if err != nil {
-		if err == postgres.ErrUserNotFound {
+		if err == userrepo.ErrUserNotFound {
 			return "", InvalidUsername
 		}
 		return "", err

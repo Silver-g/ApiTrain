@@ -1,9 +1,9 @@
-package userService
+package userservice
 
 import (
 	"ApiTrain/internal/domain"
 	"ApiTrain/internal/security"
-	"ApiTrain/internal/store"
+	"ApiTrain/internal/store/postgres/userrepo"
 	"errors"
 )
 
@@ -13,10 +13,10 @@ type UserRegister interface {
 	Register(user domain.User) (*domain.User, error)
 }
 type UserService struct {
-	userRepo store.UserRepository
+	userRepo userrepo.UserRepository
 }
 
-func NewUserService(repo store.UserRepository) *UserService {
+func NewUserService(repo userrepo.UserRepository) *UserService {
 	var userPointerBd UserService
 	userPointerBd.userRepo = repo
 	return &userPointerBd
