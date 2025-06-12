@@ -10,12 +10,12 @@ import (
 )
 
 type HandlerCreatePost struct {
-	CreatePostService postservice.CreatePost
+	PostService postservice.PostService
 }
 
-func NewCreatePostHandler(cpsvc postservice.CreatePost) *HandlerCreatePost {
+func NewCreatePostHandler(cpsvc postservice.PostService) *HandlerCreatePost {
 	var newHandlerex HandlerCreatePost
-	newHandlerex.CreatePostService = cpsvc
+	newHandlerex.PostService = cpsvc
 	return &newHandlerex
 }
 func (h *HandlerCreatePost) CreatePostHandler(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +65,7 @@ func (h *HandlerCreatePost) CreatePostHandler(w http.ResponseWriter, r *http.Req
 		return
 	}
 	CreatePostMaping := boundary.CreapePostMaping(postReq, userId) //мб завези обрбаотку ошибок
-	postId, err := h.CreatePostService.PostCreate(&CreatePostMaping)
+	postId, err := h.PostService.PostCreate(&CreatePostMaping)
 	if err != nil {
 		if err == postservice.ErrAlreadyExist {
 			boundary.WriteResponseErr(w, 409, boundary.ErrorResponse{

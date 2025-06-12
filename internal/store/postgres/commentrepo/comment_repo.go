@@ -54,7 +54,7 @@ func (r *CommentPostgres) GetCommentsByPostID(postId int) ([]*domain.CreateComme
 		}
 		comments = append(comments, &comment)
 	}
-	err = rows.Err() //зачем вообще такая ошибка конспект + конспкт по Get
+	err = rows.Err()
 	if err != nil {
 		return nil, err
 	}

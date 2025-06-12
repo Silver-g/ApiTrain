@@ -28,16 +28,16 @@ func (h *HandlerGetPostComments) BuildTreeHandler(w http.ResponseWriter, r *http
 		return
 	}
 	////////////////////////////////////////////////
-	parts := strings.Split(r.URL.Path, "/")
+	partsStr := strings.Split(r.URL.Path, "/")
 
-	if len(parts) < 4 || parts[3] != "comments" { //мб другое условие типо == 4
+	if len(partsStr) < 4 || partsStr[3] != "comments" { //мб другое условие типо == 4
 		boundary.WriteResponseErr(w, 400, boundary.ErrorResponse{
 			ErrorCode: "BadRequest",
 			Message:   "Invalid path: expected /posts/{id}/comments",
 		})
 		return
 	}
-	idStr := parts[2]
+	idStr := partsStr[2]
 	postId, err := strconv.Atoi(idStr)
 	if err != nil {
 		boundary.WriteResponseErr(w, 400, boundary.ErrorResponse{

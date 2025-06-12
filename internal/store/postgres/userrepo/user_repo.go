@@ -23,7 +23,7 @@ func NewPostgresUser(dataBase *sql.DB) *UserPostgres {
 func (r *UserPostgres) LoginByUsername(username string) (*domain.LoginUserInternal, error) {
 	var userLogin domain.LoginUserInternal
 	query := "SELECT id, username, password FROM users WHERE username = $1" // переписать сеодня в конспект напомнить sql логику не смог дописать услвоие поиска
-	err := r.db.QueryRow(query, username).Scan(&userLogin.ID, &userLogin.Username, &userLogin.PasswordHash)
+	err := r.db.QueryRow(query, username).Scan(&userLogin.Id, &userLogin.Username, &userLogin.PasswordHash)
 	// тут накосячил фул с синтаксисом повторить весь аргменты и после скан логику тоже что нужно объявлять экземпляр и с ним работать
 	// забыл что функция сама по себе ничего не возвращает она просто пишет из этого и следует логика (возвраащет только ошибку если что то пощло не так)
 	if err != nil {
@@ -39,14 +39,14 @@ func (r *UserPostgres) GetByUsername(username string) (bool, error) {
 	query := "SELECT EXISTS (SELECT 1 FROM users WHERE username = $1)"
 	err := r.db.QueryRow(query, username).Scan(&exists)
 	if err != nil {
-		return false, err
+		return false, err //тут мб проблемы с логикой
 	}
 	return exists, nil
 }
 
 func (r *UserPostgres) Create(user *domain.User) (*domain.User, error) {
 	query := "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id"
-	err := r.db.QueryRow(query, user.Username, user.Password).Scan(&user.ID)
+	err := r.db.QueryRow(query, user.Username, user.Password).Scan(&user.Id)
 	if err != nil {
 		return nil, err
 	}

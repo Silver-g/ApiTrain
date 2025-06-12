@@ -2,21 +2,23 @@ package postservice
 
 import (
 	"ApiTrain/internal/domain"
-	"ApiTrain/internal/store/postgres/postrepo"
+	"ApiTrain/internal/store/repository"
 	"errors"
 )
 
 var ErrAlreadyExist error = errors.New("post with this title already exists")
 
-type CreatePost interface {
+type PostService interface { //обновил имя для чистоты нужно все интерфейсы вынести наверное
 	PostCreate(createPostData *domain.CreatePostInternal) (int, error)
+	GetAllPostsServ() ([]*domain.PostResponse, error)
+	UpdatePostCommentsEnabled(reqData *domain.UpdatePostRequestInternal) (*domain.UpdatePostRequestInternal, error)
 }
 
 type CreatePostService struct {
-	createPostRepo postrepo.CreatePostRepo
+	createPostRepo repository.CreatePostRepo
 }
 
-func NewPostService(postCreateRepo postrepo.CreatePostRepo) *CreatePostService {
+func NewPostService(postCreateRepo repository.CreatePostRepo) *CreatePostService {
 	var createPostServicePointer CreatePostService
 	createPostServicePointer.createPostRepo = postCreateRepo
 	return &createPostServicePointer

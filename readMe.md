@@ -47,3 +47,5 @@ GET http://localhost:8080/posts/13/comments
     "text": "Тестовый коммент к 13 посту + ответ + ответ на ответ на ответ ", 
     "parentId": 21
 }
+
+http://localhost:8080/posts/13/comments-enabled

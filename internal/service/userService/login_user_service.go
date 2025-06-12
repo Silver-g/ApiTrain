@@ -45,7 +45,7 @@ func (s *UserService) Login(loginData domain.LoginUserInternal) (string, error) 
 	if err != nil {
 		return "", IncorrectPassword
 	}
-	authToken, err := security.GenerateJWT(userData.ID)
+	authToken, err := security.GenerateJWT(userData.Id)
 	if err != nil {
 		return "", err
 	}

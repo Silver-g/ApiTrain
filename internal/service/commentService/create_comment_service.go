@@ -3,6 +3,7 @@ package commentservice
 import (
 	"ApiTrain/internal/domain"
 	"ApiTrain/internal/store/postgres/commentrepo"
+	"ApiTrain/internal/store/repository"
 	"errors"
 )
 
@@ -14,10 +15,10 @@ type CreateCommentServ interface {
 }
 
 type CreateCommentService struct { //переделать название
-	createCommentRepo commentrepo.CommentRepository
+	createCommentRepo repository.CommentRepository
 }
 
-func NewCommentService(commentCreateRepo commentrepo.CommentRepository) *CreateCommentService {
+func NewCommentService(commentCreateRepo repository.CommentRepository) *CreateCommentService {
 	var CommentCreateServicePointer CreateCommentService
 	CommentCreateServicePointer.createCommentRepo = commentCreateRepo
 	return &CommentCreateServicePointer

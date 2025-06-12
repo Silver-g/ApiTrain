@@ -50,9 +50,14 @@ func (h *HandlerCreateComment) CreateCommentHandler(w http.ResponseWriter, r *ht
 	//////////////////////////////////////////////////////////////////////////////////////////////////////// -- РАЗОБРАТЬ идею то я понял но вот синтаксис местами да
 	var postIdStr string
 	parts := strings.Split(r.URL.Path, "/") // ["", "posts", "123", "comments"]
-	if len(parts) >= 4 && parts[3] == "comments" {
-		postIdStr = parts[2]
+	if len(parts) < 4 || parts[3] != "comments" {
+		boundary.WriteResponseErr(w, 400, boundary.ErrorResponse{
+			ErrorCode: "StatusBadRequest", //тут переделал мб вернуть назад
+			Message:   "Invalid syntax",
+		})
+		return
 	}
+	postIdStr = parts[2]
 	postId, err := strconv.Atoi(postIdStr)
 	if err != nil {
 		boundary.WriteResponseErr(w, 400, boundary.ErrorResponse{

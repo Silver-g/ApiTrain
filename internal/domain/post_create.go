@@ -11,5 +11,12 @@ type PostResponse struct { //мне очередной раз нужен сов�
 	Id       int            `json:"id"`
 	Title    string         `json:"title"`
 	Text     string         `json:"text"`
-	Comments []*CommentTree `json:"comments"`
+	Comments []*CommentTree `json:"comments,omitempty"` //если поле не используется то его просто нет
+}
+type UpdatePostRequestInternal struct {
+	PostId          int    `json:"post_id"`
+	UserId          int    `json:"user_id"`
+	Title           string `json:"title"`
+	Text            string `json:"text"`
+	CommentsEnabled bool   `json:"comments_enabled"`
 }
