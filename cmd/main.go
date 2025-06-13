@@ -43,7 +43,7 @@ func main() {
 		commentRepo := memory.NewMemoryCommentRepo()
 		svc = userservice.NewUserService(userRepo)
 		cpsvc = postservice.NewPostService(postRepo)
-		ccsvc = commentservice.NewCommentService(commentRepo)
+		ccsvc = commentservice.NewCommentService(commentRepo, postRepo) // нууу я черт знает можно так или нет но как говорил Олег это смело
 	} else if storeType == "postgres" {
 		db, err := db.ConnectDB()
 		if err != nil {
@@ -55,7 +55,7 @@ func main() {
 		////////////////////////////////////////////////////////
 		svc = userservice.NewUserService(userRepo)
 		cpsvc = postservice.NewPostService(postRepo)
-		ccsvc = commentservice.NewCommentService(commentRepo)
+		ccsvc = commentservice.NewCommentService(commentRepo, postRepo)
 	} else {
 		log.Fatalf("Неизвестный STORE_TYPE: %s", storeType)
 	}

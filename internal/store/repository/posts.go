@@ -7,4 +7,7 @@ type CreatePostRepo interface {
 	IsPostTitleExists(title string) (bool, error)
 	GetAllPosts() ([]*domain.PostResponse, error)
 	UpdateCommentsEnabled(reqData *domain.UpdatePostRequestInternal) (*domain.UpdatePostRequestInternal, error)
+	//перенес из comments
+	GetPostById(postId int) (*domain.PostResponse, error)
+	CommentsAllowed(postId int) error
 }

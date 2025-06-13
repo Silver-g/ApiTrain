@@ -2,9 +2,8 @@ package commentrepo
 
 import (
 	"ApiTrain/internal/domain"
+	"ApiTrain/internal/service/commentservice"
 	"database/sql"
-	"errors"
-	"fmt"
 )
 
 type CommentPostgres struct { //сделал так как у умного дяди но мб вообще нужно иначе ЮЛЯ В ПОМОЩЬ
@@ -16,20 +15,18 @@ func NewPostgresComment(dataBase *sql.DB) *CommentPostgres {
 	CommentRepoPointer.db = dataBase
 	return &CommentRepoPointer
 }
-
-var ErrPostNotFound error = errors.New("post not found")
-var ErrCommentsDisabled error = errors.New("сomments are closed for this post")
-
-func (r *CommentPostgres) GetPostById(postId int) (*domain.PostResponse, error) {
-	var postResponseData domain.PostResponse
-	query := "SELECT id, title, text FROM posts WHERE id = $1"
-	err := r.db.QueryRow(query, postId).Scan(&postResponseData.Id, &postResponseData.Title, &postResponseData.Text)
+func (r *CommentPostgres) GetParentExists(parentId int, postId int) error {
+	var exists bool
+	query := "SELECT EXISTS (SELECT 1 FROM comments WHERE id = $1 AND post_id = $2)"
+	err := r.db.QueryRow(query, parentId, postId).Scan(&exists)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &postResponseData, nil
-} //мб перести
-
+	if !exists {
+		return commentservice.ErrParentIdNotFound //потом когда ошибки вынесешь в отедльный файлик переделать
+	}
+	return nil
+}
 func (r *CommentPostgres) GetCommentsByPostID(postId int) ([]*domain.CreateCommentInternal, error) {
 	var err error
 	var comments []*domain.CreateCommentInternal //повторить синтаксис срезов
@@ -59,23 +56,6 @@ func (r *CommentPostgres) GetCommentsByPostID(postId int) ([]*domain.CreateComme
 		return nil, err
 	}
 	return comments, nil
-}
-
-func (r *CommentPostgres) CommentsAllowed(postId int) error {
-	var commentsEnabled bool
-	query := "SELECT comments_enabled FROM posts WHERE id = $1"
-	err := r.db.QueryRow(query, postId).Scan(&commentsEnabled)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			fmt.Printf("Post not found with id=%d", postId) //мб потом убать
-			return ErrPostNotFound
-		}
-		return err
-	}
-	if !commentsEnabled {
-		return ErrCommentsDisabled
-	}
-	return nil
 }
 
 func (r *CommentPostgres) CreateComment(commentData *domain.CreateCommentInternal) (*domain.CreateCommentInternal, error) {

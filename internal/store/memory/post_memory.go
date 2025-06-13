@@ -2,6 +2,7 @@ package memory
 
 import (
 	"ApiTrain/internal/domain"
+	"ApiTrain/internal/store/postgres/postrepo"
 	"errors"
 	"sync"
 )
@@ -18,6 +19,37 @@ func NewMemoryPostRepo() *MemoryPostRepo {
 		nextId: 1,
 	}
 }
+func (m *MemoryPostRepo) GetPostById(postId int) (*domain.PostResponse, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var postResponseData domain.PostResponse
+	for _, exists := range m.posts {
+		if exists.Id == postId {
+			postResponseData.Id = exists.Id
+			postResponseData.Title = exists.Title
+			postResponseData.Text = exists.Text
+			return &postResponseData, nil
+		}
+	}
+	return nil, postrepo.ErrPostNotFound
+}
+
+func (m *MemoryPostRepo) CommentsAllowed(postId int) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var commentsEnabled bool
+	for _, exists := range m.posts {
+		if exists.Id == postId {
+			commentsEnabled = exists.CommentsEnabled
+			if !commentsEnabled {
+				return postrepo.ErrCommentsDisabled
+			}
+			return nil
+		}
+	}
+	return postrepo.ErrPostNotFound
+}
+
 func (m *MemoryPostRepo) CreatePost(createPostData *domain.CreatePostInternal) (*domain.CreatePostInternal, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -42,8 +74,8 @@ func (m *MemoryPostRepo) GetAllPosts() ([]*domain.PostResponse, error) {
 	m.mu.Lock() //опять же мб RLock
 	defer m.mu.Unlock()
 	var posts []*domain.PostResponse
-	if len(m.posts) == 0 { //для пагинации нужно будет конечно обработать более сложные случаи
-		return nil, errors.New("no posts found")
+	if len(m.posts) == 0 { //для пагинации нужно будет конечно обработать более сложные случаи а ну и по логике нет ничего плохого чтобы вернуть пустой срез постов потому что ну страница пустая
+		return nil, errors.New("no posts found") //мб убрать эту ошибку в конце решу
 	}
 	for _, post := range m.posts {
 		postResp := &domain.PostResponse{

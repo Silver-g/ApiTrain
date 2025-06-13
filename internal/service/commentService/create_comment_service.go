@@ -2,7 +2,7 @@ package commentservice
 
 import (
 	"ApiTrain/internal/domain"
-	"ApiTrain/internal/store/postgres/commentrepo"
+	"ApiTrain/internal/store/postgres/postrepo"
 	"ApiTrain/internal/store/repository"
 	"errors"
 )
@@ -16,26 +16,32 @@ type CreateCommentServ interface {
 
 type CreateCommentService struct { //переделать название
 	createCommentRepo repository.CommentRepository
+	postRepo          repository.CreatePostRepo
 }
 
-func NewCommentService(commentCreateRepo repository.CommentRepository) *CreateCommentService {
-	var CommentCreateServicePointer CreateCommentService
-	CommentCreateServicePointer.createCommentRepo = commentCreateRepo
-	return &CommentCreateServicePointer
+func NewCommentService(commentRepo repository.CommentRepository, postRepo repository.CreatePostRepo) *CreateCommentService {
+	return &CreateCommentService{
+		createCommentRepo: commentRepo, //тут подробно разобрать
+		postRepo:          postRepo,
+	}
 }
-
 func (s *CreateCommentService) CommentCreate(commentData *domain.CreateCommentInternal) (int, error) { //опять ебучие указатели врот их наоборот//
-	err := s.createCommentRepo.CommentsAllowed(commentData.PostId)
-	if err == commentrepo.ErrCommentsDisabled {
+	err := s.postRepo.CommentsAllowed(commentData.PostId)
+	if err == postrepo.ErrCommentsDisabled {
 		return 0, ErrCommentsDisabled
 	}
-	if err == commentrepo.ErrPostNotFound {
+	if err == postrepo.ErrPostNotFound {
 		return 0, ErrPostNotFound
 	}
 	if err != nil {
-		return 0, err
+		return 0, err //не уверен что это надо но осавил так как мб внутреннаяя ошибка в том методе прокнет а так я бы перезаписал err
 	}
-
+	if commentData.ParentId != nil {
+		err = s.createCommentRepo.GetParentExists(*commentData.ParentId, commentData.PostId)
+		if err != nil {
+			return 0, err
+		}
+	}
 	commentId, err := s.createCommentRepo.CreateComment(commentData)
 	if err != nil {
 		return 0, err //можно ли вообще делать return 0

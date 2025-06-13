@@ -35,7 +35,7 @@ POST http://localhost:8080/posts
     "text": "Тестовый текст поста 55",
     "comments_enabled": true
 }
-#### Создание комментария 
+#### Создание комментария //нашел ошибку если написать запрос к несуществующему родителю все работает а не должно
 POST http://localhost:8080/posts/13/comments
 {
     "text": "Тестовый коммент к 13 посту", 
@@ -43,9 +43,12 @@ POST http://localhost:8080/posts/13/comments
 }
 #### Получение списка комментариев и пост
 GET http://localhost:8080/posts/13/comments
-{
-    "text": "Тестовый коммент к 13 посту + ответ + ответ на ответ на ответ ", 
-    "parentId": 21
-}
 
 http://localhost:8080/posts/13/comments-enabled
+
+
+
+
+
+
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDk5MTM5MzgsInVzZXJfaWQiOjF9.fH8wuo9fLwo6_HaJABFvCDadfun2KN4ObNj95QCYOJM",

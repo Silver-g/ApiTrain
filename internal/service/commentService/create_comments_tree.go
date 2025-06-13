@@ -26,7 +26,7 @@ func CreateResponsePostAndComments(postData *domain.PostResponse, commentsData [
 // надо куда то перенести маперы
 // -----------------------------------------------------
 func (s *CreateCommentService) GetPostByIdData(postId int) (*domain.PostResponse, error) {
-	postData, err := s.createCommentRepo.GetPostById(postId)
+	postData, err := s.postRepo.GetPostById(postId)
 	if err != nil {
 		return nil, err
 	}

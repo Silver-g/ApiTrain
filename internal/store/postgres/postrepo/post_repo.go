@@ -3,16 +3,48 @@ package postrepo
 import (
 	"ApiTrain/internal/domain"
 	"database/sql"
+	"errors"
+	"fmt"
 )
 
 type PostPostgres struct { //сделал так как у умного дяди но мб вообще нужно иначе ЮЛЯ В ПОМОЩЬ
 	db *sql.DB
 }
 
+var ErrPostNotFound error = errors.New("post not found")
+var ErrCommentsDisabled error = errors.New("сomments are closed for this post")
+
 func NewPostgresPost(dataBase *sql.DB) *PostPostgres {
 	var PostRepoPointer PostPostgres
 	PostRepoPointer.db = dataBase
 	return &PostRepoPointer
+}
+
+func (r *PostPostgres) GetPostById(postId int) (*domain.PostResponse, error) {
+	var postResponseData domain.PostResponse
+	query := "SELECT id, title, text FROM posts WHERE id = $1"
+	err := r.db.QueryRow(query, postId).Scan(&postResponseData.Id, &postResponseData.Title, &postResponseData.Text)
+	if err != nil {
+		return nil, err
+	}
+	return &postResponseData, nil
+} //перенес из комментов
+
+func (r *PostPostgres) CommentsAllowed(postId int) error {
+	var commentsEnabled bool
+	query := "SELECT comments_enabled FROM posts WHERE id = $1"
+	err := r.db.QueryRow(query, postId).Scan(&commentsEnabled)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			fmt.Printf("Post not found with id=%d", postId) //мб потом убать
+			return ErrPostNotFound
+		}
+		return err
+	}
+	if !commentsEnabled {
+		return ErrCommentsDisabled
+	}
+	return nil
 }
 
 func (r *PostPostgres) UpdateCommentsEnabled(reqData *domain.UpdatePostRequestInternal) (*domain.UpdatePostRequestInternal, error) {

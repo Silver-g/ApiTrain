@@ -2,6 +2,7 @@ package memory
 
 import (
 	"ApiTrain/internal/domain"
+	"ApiTrain/internal/service/commentservice"
 	"sync"
 )
 
@@ -18,13 +19,24 @@ func NewMemoryCommentRepo() *CommentsMemoryRepo {
 	}
 }
 
+func (m *CommentsMemoryRepo) GetParentExists(parentId int, postId int) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, exists := range m.comments {
+		if exists.Id == parentId && exists.PostId == postId {
+			return nil
+		}
+	}
+	return commentservice.ErrParentIdNotFound
+}
+
 func (m *CommentsMemoryRepo) CreateComment(commentData *domain.CreateCommentInternal) (*domain.CreateCommentInternal, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	commentData.Id = m.nextId
 	m.comments[commentData.Id] = commentData
-
+	m.nextId++
 	return commentData, nil
 }
 
@@ -38,14 +50,4 @@ func (m *CommentsMemoryRepo) GetCommentsByPostID(postId int) ([]*domain.CreateCo
 		}
 	}
 	return comments, nil
-}
-func (m *CommentsMemoryRepo) GetPostById(postId int) (*domain.PostResponse, error) {
-	// Вариант 1: вернуть ошибку (не найден) или
-	// Вариант 2: вернуть базовую информацию о посте из memory (см. MemoryPostRepo)
-	// Для простоты пока возвращаем PostResponse c Id (Title/Text пустые)
-	return &domain.PostResponse{Id: postId, Title: "", Text: ""}, nil
-}
-func (m *CommentsMemoryRepo) CommentsAllowed(postId int) error {
-	// В памяти всегда разрешаем комментировать (нет поля comments_enabled)
-	return nil
 }

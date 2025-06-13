@@ -34,6 +34,18 @@ func (r *UserPostgres) LoginByUsername(username string) (*domain.LoginUserIntern
 	}
 	return &userLogin, nil
 }
+func (r *UserPostgres) GetUserById(userid int) error {
+	var exists bool
+	query := "SELECT EXISTS (SELECT 1 FROM user WHERE id = $1)"
+	err := r.db.QueryRow(query, userid).Scan(&exists)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return ErrUserNotFound
+	}
+	return nil
+}
 func (r *UserPostgres) GetByUsername(username string) (bool, error) {
 	var exists bool
 	query := "SELECT EXISTS (SELECT 1 FROM users WHERE username = $1)"

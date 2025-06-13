@@ -8,4 +8,5 @@ type UserRepository interface {
 	Create(user *domain.User) (*domain.User, error)
 	GetByUsername(username string) (bool, error)
 	LoginByUsername(username string) (*domain.LoginUserInternal, error)
+	GetUserById(userid int) error
 }
