@@ -19,6 +19,16 @@ func NewMemoryUserRepo() *MemoryUserRepo {
 		nextId: 1,
 	}
 }
+func (m *MemoryUserRepo) GetUserById(userid int) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, exists := range m.users {
+		if exists.Id == userid {
+			return nil
+		}
+	}
+	return userrepo.ErrUserNotFound
+}
 func (m *MemoryUserRepo) Create(user *domain.User) (*domain.User, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()

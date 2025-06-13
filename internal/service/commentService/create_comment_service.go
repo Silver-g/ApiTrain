@@ -17,16 +17,22 @@ type CreateCommentServ interface {
 type CreateCommentService struct { //переделать название
 	createCommentRepo repository.CommentRepository
 	postRepo          repository.CreatePostRepo
+	userRepo          repository.UserRepository
 }
 
-func NewCommentService(commentRepo repository.CommentRepository, postRepo repository.CreatePostRepo) *CreateCommentService {
+func NewCommentService(commentRepo repository.CommentRepository, postRepo repository.CreatePostRepo, userRepo repository.UserRepository) *CreateCommentService {
 	return &CreateCommentService{
 		createCommentRepo: commentRepo, //тут подробно разобрать
 		postRepo:          postRepo,
+		userRepo:          userRepo,
 	}
 }
 func (s *CreateCommentService) CommentCreate(commentData *domain.CreateCommentInternal) (int, error) { //опять ебучие указатели врот их наоборот//
-	err := s.postRepo.CommentsAllowed(commentData.PostId)
+	err := s.userRepo.GetUserById(commentData.UserId)
+	if err != nil {
+		return 0, err
+	}
+	err = s.postRepo.CommentsAllowed(commentData.PostId)
 	if err == postrepo.ErrCommentsDisabled {
 		return 0, ErrCommentsDisabled
 	}

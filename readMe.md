@@ -50,5 +50,3 @@ http://localhost:8080/posts/13/comments-enabled
 
 
 
-
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NDk5MTM5MzgsInVzZXJfaWQiOjF9.fH8wuo9fLwo6_HaJABFvCDadfun2KN4ObNj95QCYOJM",

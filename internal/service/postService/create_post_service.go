@@ -16,15 +16,21 @@ type PostService interface { //обновил имя для чистоты ну�
 
 type CreatePostService struct {
 	createPostRepo repository.CreatePostRepo
+	userRepo       repository.UserRepository
 }
 
-func NewPostService(postCreateRepo repository.CreatePostRepo) *CreatePostService {
-	var createPostServicePointer CreatePostService
-	createPostServicePointer.createPostRepo = postCreateRepo
-	return &createPostServicePointer
+func NewPostService(postCreateRepo repository.CreatePostRepo, userRepo repository.UserRepository) *CreatePostService {
+	return &CreatePostService{
+		createPostRepo: postCreateRepo,
+		userRepo:       userRepo,
+	}
 }
 
 func (s *CreatePostService) PostCreate(createPostMapData *domain.CreatePostInternal) (int, error) {
+	err := s.userRepo.GetUserById(createPostMapData.UserId)
+	if err != nil {
+		return 0, err
+	}
 	exists, err := s.createPostRepo.IsPostTitleExists(createPostMapData.Title)
 	if err != nil {
 		return 0, err

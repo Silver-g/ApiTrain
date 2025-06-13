@@ -36,7 +36,7 @@ func (r *UserPostgres) LoginByUsername(username string) (*domain.LoginUserIntern
 }
 func (r *UserPostgres) GetUserById(userid int) error {
 	var exists bool
-	query := "SELECT EXISTS (SELECT 1 FROM user WHERE id = $1)"
+	query := "SELECT EXISTS (SELECT 1 FROM users WHERE id = $1)"
 	err := r.db.QueryRow(query, userid).Scan(&exists)
 	if err != nil {
 		return err

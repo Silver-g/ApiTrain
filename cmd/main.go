@@ -42,8 +42,8 @@ func main() {
 		postRepo := memory.NewMemoryPostRepo()
 		commentRepo := memory.NewMemoryCommentRepo()
 		svc = userservice.NewUserService(userRepo)
-		cpsvc = postservice.NewPostService(postRepo)
-		ccsvc = commentservice.NewCommentService(commentRepo, postRepo) // нууу я черт знает можно так или нет но как говорил Олег это смело
+		cpsvc = postservice.NewPostService(postRepo, userRepo)
+		ccsvc = commentservice.NewCommentService(commentRepo, postRepo, userRepo) // нууу я черт знает можно так или нет но как говорил Олег это смело
 	} else if storeType == "postgres" {
 		db, err := db.ConnectDB()
 		if err != nil {
@@ -54,8 +54,8 @@ func main() {
 		commentRepo := commentrepo.NewPostgresComment(db)
 		////////////////////////////////////////////////////////
 		svc = userservice.NewUserService(userRepo)
-		cpsvc = postservice.NewPostService(postRepo)
-		ccsvc = commentservice.NewCommentService(commentRepo, postRepo)
+		cpsvc = postservice.NewPostService(postRepo, userRepo)
+		ccsvc = commentservice.NewCommentService(commentRepo, postRepo, userRepo)
 	} else {
 		log.Fatalf("Неизвестный STORE_TYPE: %s", storeType)
 	}
