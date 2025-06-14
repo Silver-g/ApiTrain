@@ -49,7 +49,7 @@ func (r *PostPostgres) CommentsAllowed(postId int) error {
 
 func (r *PostPostgres) UpdateCommentsEnabled(reqData *domain.UpdatePostRequestInternal) (*domain.UpdatePostRequestInternal, error) {
 	var result domain.UpdatePostRequestInternal
-	query := "UPDATE posts SET comments_enabled = $1 WHERE id = $2 AND userid = $3 RETURNING id, title, text, comments_enabled"
+	query := "UPDATE posts SET comments_enabled = $1 WHERE id = $2 AND user_id = $3 RETURNING id, title, text, comments_enabled"
 	err := r.db.QueryRow(query, reqData.CommentsEnabled, reqData.PostId, reqData.UserId).Scan(&result.PostId, &result.Title, &result.Text, &result.CommentsEnabled)
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func (r *PostPostgres) IsPostTitleExists(title string) (bool, error) { //воз�
 
 }
 func (r *PostPostgres) CreatePost(createPostData *domain.CreatePostInternal) (*domain.CreatePostInternal, error) {
-	query := "INSERT INTO posts (title, text, comments_enabled, userid) VALUES ($1, $2, $3, $4) RETURNING id"
+	query := "INSERT INTO posts (title, text, comments_enabled, user_id) VALUES ($1, $2, $3, $4) RETURNING id"
 	err := r.db.QueryRow(query, createPostData.Title, createPostData.Text, createPostData.CommentsEnabled, createPostData.UserId).Scan(&createPostData.Id) // Уточнить обязателньый ли аргумент Scan я думаю нет и зачем возвращать id я не хотел жинзь застваила
 	if err != nil {                                                                                                                                        //добавить булевое поле в запрос (в баундари и тут)
 		return nil, err

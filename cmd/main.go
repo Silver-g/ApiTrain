@@ -2,6 +2,7 @@ package main
 
 import (
 	"ApiTrain/internal/config"
+	"ApiTrain/internal/handlers"
 	"ApiTrain/internal/handlers/commenthandler"
 	"ApiTrain/internal/handlers/posthandler"
 	"ApiTrain/internal/handlers/userhandler"
@@ -71,23 +72,20 @@ func main() {
 	handlerCommentCreate := commenthandler.NewCreateCommentHandler(ccsvc)
 	handlerBuildTree := commenthandler.NewBuildTreeHandler(ccsvc)
 	//
-	var commentTemp commenthandler.CommentRouter
-	commentTemp.CreateHandler = handlerCommentCreate
-	commentTemp.TreeHandler = handlerBuildTree //разобрать эту запись
-	commentRouter := &commentTemp
-	//
-	var postTemp posthandler.PostsRouter
-	postTemp.CreatePostHandler = handlerPostCreate
-	postTemp.GetALLPostsHandler = handlerPostGetList
-	postTemp.UpdateCommentsEnabledHandler = handlerUpdateCommentsEnabled //полностью переписать роутер
-	postsRouter := &postTemp
+	var router handlers.RouteInfo
+	router.CreatePostHandler = handlerPostCreate
+	router.GetALLPostsHandler = handlerPostGetList
+	router.UpdateCommentsEnabledHandler = handlerUpdateCommentsEnabled //полностью переписать роутер
+	router.CreateHandler = handlerCommentCreate
+	router.TreeHandler = handlerBuildTree //разобрать эту запись
+	handlerRouter := &router
 	//////////////////////////////////////////////////////////
 	http.HandleFunc("/", ServerHandler)
 	http.HandleFunc("/register", handler.RegisterUserHandler)
 	http.HandleFunc("/login", handlerlogin.LoginUserHandler) // тут кста все же не на функцию конструктор а как ты и думал на метод обработчика что в целомл логично
 	// ниже костыль
-	http.Handle("/posts", postsRouter)
-	http.Handle("/posts/", commentRouter) //Подробно разобрать что как и почему в самом кастомном роуте и в целом
+	http.Handle("/posts", handlerRouter)  //хоть они и не красивые но пойдет мб потом переписать сделать переадресацию /posts
+	http.Handle("/posts/", handlerRouter) //Подробно разобрать что как и почему в самом кастомном роуте и в целом
 	//
 	fmt.Println("Server running on http://localhost:8080")
 	err = http.ListenAndServe(":8080", nil)

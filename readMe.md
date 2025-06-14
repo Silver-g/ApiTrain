@@ -1,7 +1,7 @@
 ## ApiTrain
 
 Учебный проект на Go с авторизацией, постами и комментариями.
-
+---
 ### Структура проекта
 
 - `internal/domain` — доменные сущности.
@@ -11,8 +11,9 @@
 
 ### Запуск проекта
 go run cmd/main.go
-
-
+STORE_TYPE=postgres go run cmd/main.go
+STORE_TYPE=memory go run cmd/main.go
+---
 ### Основные запросы:
 Ниже представленные основные запросы, тестировал через insomnia
 #### register регистрация
@@ -44,9 +45,8 @@ POST http://localhost:8080/posts/13/comments
 #### Получение списка комментариев и пост
 GET http://localhost:8080/posts/13/comments
 
-http://localhost:8080/posts/13/comments-enabled
-
-
-
-
-
+#### Обновление возможности оставлять комменты
+PATH http://localhost:8080/posts/13/comments-enabled
+{
+    "comments_enabled": false
+}

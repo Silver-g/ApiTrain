@@ -47,6 +47,7 @@ func (h *HandlerCreateComment) CreateCommentHandler(w http.ResponseWriter, r *ht
 		})
 		return
 	}
+
 	//////////////////////////////////////////////////////////////////////////////////////////////////////// -- РАЗОБРАТЬ идею то я понял но вот синтаксис местами да
 	var postIdStr string
 	parts := strings.Split(r.URL.Path, "/") // ["", "posts", "123", "comments"]
